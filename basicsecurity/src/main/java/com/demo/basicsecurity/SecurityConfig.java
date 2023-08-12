@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID");
 
         http.rememberMe()
-                .rememberMeParameter("remember") // default는 remember-me
+//                .rememberMeParameter("remember") // default는 remember-me
                 .tokenValiditySeconds(3600) // default는 14일
                 .userDetailsService(userDetailsService);
 
