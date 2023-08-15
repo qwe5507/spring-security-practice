@@ -1,16 +1,12 @@
 package com.demo.basicsecurity;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -24,10 +20,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
-@Configuration
+//@Configuration
 public class SecurityConfig {
 
-    @Bean
+    //    @Bean
     public UserDetailsManager users() {
 
         UserDetails user = User.builder()
@@ -51,7 +47,7 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(user, sys, admin);
     }
 
-    @Bean
+    //    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // 스프링 시큐리티 5.4에 맞춘 강의 예제
         http.authorizeHttpRequests(authorizeHttpRequests ->
