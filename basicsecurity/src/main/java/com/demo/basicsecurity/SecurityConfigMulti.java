@@ -7,24 +7,22 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-public class RestSecurityConfig {
+public class SecurityConfigMulti {
 
     @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    public SecurityFilterChain restSecurityFilterChain(HttpSecurity http) throws Exception {
+//    @Order(Ordered.HIGHEST_PRECEDENCE)
+    @Order(0)
+    public SecurityFilterChain securityFilterChain1(HttpSecurity http) throws Exception {
 
         http
-                .antMatcher("/api/**")
-                .authorizeRequests()
-                .antMatchers("/api/**").permitAll()
-                .anyRequest().authenticated();
+            .antMatcher("/admin/**")
+            .authorizeRequests()
+            .anyRequest().authenticated();
 
-        // 인증 필터 별도 구현
-        http.addFilter(restAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.httpBasic();
 
         return http.build();
 
@@ -33,21 +31,17 @@ public class RestSecurityConfig {
 
 @Configuration
 @EnableWebSecurity
-class FormSecurityConfig {
+class SecurityConfig2 {
 
     @Bean
-    public SecurityFilterChain formSecurityFilterChain(HttpSecurity http) throws Exception {
+    @Order(1)
+    public SecurityFilterChain securityFilterChain2(HttpSecurity http) throws Exception {
 
         http
-                .antMatcher("/web/**")
-                .authorizeRequests()
-                .antMatchers("/index","/").permitAll()
-                .anyRequest().authenticated();
+            .authorizeRequests()
+            .anyRequest().permitAll();
 
-        http.formLogin()
-                .loginPage("/login")
-                .defaultSuccessUrl("/")
-                .permitAll();
+        http.formLogin();
 
         return http.build();
 
