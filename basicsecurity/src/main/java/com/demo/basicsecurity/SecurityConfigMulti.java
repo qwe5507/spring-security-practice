@@ -8,13 +8,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration
-@EnableWebSecurity
+//@Configuration
+//@EnableWebSecurity
 public class SecurityConfigMulti {
 
-    @Bean
+//    @Bean
 //    @Order(Ordered.HIGHEST_PRECEDENCE)
-    @Order(0)
+//    @Order(0)
     public SecurityFilterChain securityFilterChain1(HttpSecurity http) throws Exception {
 
         http
@@ -29,12 +29,12 @@ public class SecurityConfigMulti {
     }
 }
 
-@Configuration
-@EnableWebSecurity
+//@Configuration
+//@EnableWebSecurity
 class SecurityConfig2 {
 
-    @Bean
-    @Order(1)
+//    @Bean
+//    @Order(1)
     public SecurityFilterChain securityFilterChain2(HttpSecurity http) throws Exception {
 
         http

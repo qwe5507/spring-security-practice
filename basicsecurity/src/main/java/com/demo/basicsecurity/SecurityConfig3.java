@@ -14,7 +14,9 @@ public class SecurityConfig3 {
         // 스프링 시큐리티 5.4에 맞춘 강의 예제
         http.authorizeHttpRequests(authorizeHttpRequests ->
                 authorizeHttpRequests
-                        .anyRequest().authenticated());
+                        .antMatchers("/user").hasRole("USER")
+                        .anyRequest().permitAll()
+        );
 
         http.formLogin();
 
