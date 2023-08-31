@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @RequiredArgsConstructor
@@ -46,6 +47,9 @@ public class SecurityConfig {
     @Autowired
     private AuthenticationDetailsSource authenticationDetailsSource;
 
+    @Autowired
+    private AuthenticationSuccessHandler customAuthenticationSuccessHandler;
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         // 보안필터를 거치지 않는다.
@@ -70,6 +74,7 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .loginProcessingUrl("/login_proc")
                 .defaultSuccessUrl("/")
+                .successHandler(customAuthenticationSuccessHandler)
                 .authenticationDetailsSource(authenticationDetailsSource)
                 .permitAll();
 
