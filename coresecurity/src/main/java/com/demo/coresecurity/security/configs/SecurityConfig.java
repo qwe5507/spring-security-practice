@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
@@ -48,6 +49,9 @@ public class SecurityConfig {
     private AuthenticationDetailsSource authenticationDetailsSource;
 
     @Autowired
+    private AuthenticationFailureHandler CustomAuthenticationFailureHandler;
+
+    @Autowired
     private AuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
@@ -64,7 +68,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/", "user/login/**", "/users").permitAll()
+                .antMatchers("/", "user/login/**", "/users", "/login*").permitAll()
                 .antMatchers("/mypage").hasRole("USER")
                 .antMatchers("/messages").hasRole("MANAGER")
                 .antMatchers("/config").hasRole("ADMIN")
@@ -75,6 +79,7 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login_proc")
                 .defaultSuccessUrl("/")
                 .successHandler(customAuthenticationSuccessHandler)
+                .failureHandler(CustomAuthenticationFailureHandler)
                 .authenticationDetailsSource(authenticationDetailsSource)
                 .permitAll();
 
