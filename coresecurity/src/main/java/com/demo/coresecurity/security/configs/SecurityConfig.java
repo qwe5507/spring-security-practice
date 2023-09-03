@@ -1,5 +1,6 @@
 package com.demo.coresecurity.security.configs;
 
+import com.demo.coresecurity.security.filter.AjaxLoginProcessingFilter;
 import com.demo.coresecurity.security.handler.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,11 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +20,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
@@ -51,10 +58,13 @@ public class SecurityConfig {
     private AuthenticationDetailsSource authenticationDetailsSource;
 
     @Autowired
-    private AuthenticationFailureHandler CustomAuthenticationFailureHandler;
+    private AuthenticationFailureHandler customAuthenticationFailureHandler;
 
     @Autowired
     private AuthenticationSuccessHandler customAuthenticationSuccessHandler;
+
+    @Autowired
+    private AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -81,12 +91,17 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login_proc")
                 .defaultSuccessUrl("/")
                 .successHandler(customAuthenticationSuccessHandler)
-                .failureHandler(CustomAuthenticationFailureHandler)
+                .failureHandler(customAuthenticationFailureHandler)
                 .authenticationDetailsSource(authenticationDetailsSource)
                 .permitAll();
 
         http.exceptionHandling()
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                .accessDeniedPage("/denied")
                 .accessDeniedHandler(accessDeniedHandler());
+
+        http.addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.csrf().disable();
 
         return http.build();
     }
@@ -97,5 +112,18 @@ public class SecurityConfig {
         accessDeniedHandler.setErrorPage("/denied");
 
         return accessDeniedHandler;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager () throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public AjaxLoginProcessingFilter ajaxLoginProcessingFilter() throws Exception {
+
+        AjaxLoginProcessingFilter ajaxLoginProcessingFilter = new AjaxLoginProcessingFilter();
+        ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManager());
+        return ajaxLoginProcessingFilter;
     }
 }
