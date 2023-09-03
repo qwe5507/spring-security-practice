@@ -2,14 +2,18 @@ package com.demo.coresecurity.security.configs;
 
 import com.demo.coresecurity.security.filter.AjaxLoginProcessingFilter;
 import com.demo.coresecurity.security.handler.CustomAccessDeniedHandler;
+import com.demo.coresecurity.security.provider.FormAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,8 +29,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @RequiredArgsConstructor
+@Order(1)
 public class SecurityConfig {
-
 
     //    @Bean
 //    public UserDetailsManager users() {
@@ -63,9 +67,6 @@ public class SecurityConfig {
     @Autowired
     private AuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
-    @Autowired
-    private AuthenticationConfiguration authenticationConfiguration;
-
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         // 보안필터를 거치지 않는다.
@@ -78,12 +79,18 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationProvider authenticationProvider(){
+        return new FormAuthenticationProvider(passwordEncoder());
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/", "user/login/**", "/users", "/login*").permitAll()
                 .antMatchers("/mypage").hasRole("USER")
                 .antMatchers("/messages").hasRole("MANAGER")
                 .antMatchers("/config").hasRole("ADMIN")
+//                .antMatchers("/", "user/login/**", "/users", "/login*").permitAll()
+                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated();
 
         http.formLogin()
@@ -95,12 +102,16 @@ public class SecurityConfig {
                 .authenticationDetailsSource(authenticationDetailsSource)
                 .permitAll();
 
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.authenticationProvider(authenticationProvider());
+        authenticationManagerBuilder.parentAuthenticationManager(null);
+//        http.authenticationProvider(authenticationProvider());
+
         http.exceptionHandling()
                 .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 .accessDeniedPage("/denied")
                 .accessDeniedHandler(accessDeniedHandler());
 
-        http.addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
         http.csrf().disable();
 
         return http.build();
@@ -112,18 +123,5 @@ public class SecurityConfig {
         accessDeniedHandler.setErrorPage("/denied");
 
         return accessDeniedHandler;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager () throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    public AjaxLoginProcessingFilter ajaxLoginProcessingFilter() throws Exception {
-
-        AjaxLoginProcessingFilter ajaxLoginProcessingFilter = new AjaxLoginProcessingFilter();
-        ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManager());
-        return ajaxLoginProcessingFilter;
     }
 }
