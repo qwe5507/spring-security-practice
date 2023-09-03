@@ -78,30 +78,29 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/mypage").hasRole("USER")
-                .antMatchers("/messages").hasRole("MANAGER")
-                .antMatchers("/config").hasRole("ADMIN")
-//                .antMatchers("/", "user/login/**", "/users", "/login*").permitAll()
-                .antMatchers("/**").permitAll()
-                .anyRequest().authenticated();
-
-        http.formLogin()
-                .loginPage("/login")
-                .loginProcessingUrl("/login_proc")
-                .defaultSuccessUrl("/")
-                .successHandler(formAuthenticationSuccessHandler)
-                .failureHandler(formAuthenticationFailureHandler)
-                .authenticationDetailsSource(formAuthenticationDetailsSource)
-                .permitAll();
-
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider());
         authenticationManagerBuilder.parentAuthenticationManager(null);
-//        http.authenticationProvider(authenticationProvider());
 
-        http.exceptionHandling()
+        http
+                .authorizeRequests()
+                .antMatchers("/", "/users", "/user/login/**", "/error", "/login**").permitAll()
+                .antMatchers("/mypage").hasRole("USER")
+                .antMatchers("/messages").hasRole("MANAGER")
+                .antMatchers("/config").hasRole("ADMIN")
+                .anyRequest().authenticated()
+                .and()
+                .formLogin()
+                .loginPage("/login")
+                .loginProcessingUrl("/login_proc")
+                .defaultSuccessUrl("/")
+                .authenticationDetailsSource(formAuthenticationDetailsSource)
+                .successHandler(formAuthenticationSuccessHandler)
+                .failureHandler(formAuthenticationFailureHandler)
+                .permitAll();
+        http
+                .exceptionHandling()
                 .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 .accessDeniedPage("/denied")
                 .accessDeniedHandler(accessDeniedHandler());
@@ -110,6 +109,39 @@ public class SecurityConfig {
 
         return http.build();
     }
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http.authorizeRequests()
+//                .antMatchers("/mypage").hasRole("USER")
+//                .antMatchers("/messages").hasRole("MANAGER")
+//                .antMatchers("/config").hasRole("ADMIN")
+////                .antMatchers("/", "user/login/**", "/users", "/login*").permitAll()
+//                .antMatchers("/**").permitAll()
+//                .anyRequest().authenticated();
+//
+//        http.formLogin()
+//                .loginPage("/login")
+//                .loginProcessingUrl("/login_proc")
+//                .defaultSuccessUrl("/")
+//                .successHandler(formAuthenticationSuccessHandler)
+//                .failureHandler(formAuthenticationFailureHandler)
+//                .authenticationDetailsSource(formAuthenticationDetailsSource)
+//                .permitAll();
+//
+//        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+//        authenticationManagerBuilder.authenticationProvider(authenticationProvider());
+//        authenticationManagerBuilder.parentAuthenticationManager(null);
+////        http.authenticationProvider(authenticationProvider());
+//
+//        http.exceptionHandling()
+//                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+//                .accessDeniedPage("/denied")
+//                .accessDeniedHandler(accessDeniedHandler());
+//
+//        http.csrf().disable();
+//
+//        return http.build();
+//    }
 
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
