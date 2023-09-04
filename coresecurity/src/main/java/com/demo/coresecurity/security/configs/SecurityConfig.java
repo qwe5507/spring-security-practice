@@ -105,7 +105,7 @@ public class SecurityConfig {
                 .accessDeniedPage("/denied")
                 .accessDeniedHandler(accessDeniedHandler());
 
-        http.csrf().disable();
+//        http.csrf().disable();
 
         return http.build();
     }

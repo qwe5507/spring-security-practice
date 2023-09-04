@@ -51,6 +51,7 @@ public class AjaxSecurityConfig {
                 .antMatcher("/api/**")
                 .authorizeRequests()
                 .antMatchers("/api/messages").hasRole("MANAGER")
+                .antMatchers("/api/login").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -60,7 +61,7 @@ public class AjaxSecurityConfig {
 
         http.authenticationProvider(ajaxAuthenticationProvider());
 
-        http.csrf().disable();
+//        http.csrf().disable();
 
         // Custom DSL
 //        customConfigurerAjax(http);

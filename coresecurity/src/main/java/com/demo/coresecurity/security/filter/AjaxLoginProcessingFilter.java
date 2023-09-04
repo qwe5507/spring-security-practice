@@ -20,7 +20,7 @@ public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingF
 
     public AjaxLoginProcessingFilter() {
         // /api/login 요청이 들어오면 해당 필터가 작동된다.
-        super(new AntPathRequestMatcher("/api/login"));
+        super(new AntPathRequestMatcher("/api/login", "POST"));
     }
 
     @Override
